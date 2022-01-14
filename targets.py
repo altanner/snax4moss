@@ -1,6 +1,14 @@
 baseurl = "https://mossbauer.mtholyoke.edu/"
 page_string = "?pageNo="
 
+test_targets = [
+    'https://mossbauer.mtholyoke.edu/sample/Wilshire Hornblende 86LEH 9mil 9-30-91',
+    'https://mossbauer.mtholyoke.edu/sample/Wilshire Hornblende FR-12 22mil 9-27-91',
+    'https://mossbauer.mtholyoke.edu/sample/Amphibole 5B',]
+    # 'https://mossbauer.mtholyoke.edu/sample/Wilshire Hornblende FR-12 8mil 9-23-91',
+    # 'https://mossbauer.mtholyoke.edu/sample/Wilshire San Carlos Hornblende 6mil 8-15-91',
+    # 'https://mossbauer.mtholyoke.edu/sample/Wilshire Tm Hornblende 9mil 9-5-91',]
+
 #~ mt holyoke categories
 categories = [
     "group/Allophane",
