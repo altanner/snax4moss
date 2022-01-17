@@ -10,11 +10,11 @@ test_targets = [
     # 'https://mossbauer.mtholyoke.edu/sample/Wilshire Tm Hornblende 9mil 9-5-91',]
 
 
-categories = [
+categories1 = [
     "group/Allophane",]
 
 #~ mt holyoke categories
-dcategories = [
+categories = [
     "group/Allophane",
     "group/Alunite",
     "group/Amphibole",

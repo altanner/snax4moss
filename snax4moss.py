@@ -60,7 +60,6 @@ def get_dl_links_from_urls(url) -> list:
     often doesn't exist."""
 
     dl_links = []
-    print(url)
     #~ pull down the category page
     try:
         target = requests.get(
@@ -133,12 +132,15 @@ def main():
                 #~ get the file
                 try:
                     incoming = requests.get(dl)
-                    with open(outfile, "w") as savefile:
-                        savefile.write(incoming.text)
-                    hits += 1
+                    if incoming.status_code == 200:
+                        with open(outfile, "w") as savefile:
+                            savefile.write(incoming.text)
+                        hits += 1
+                    else:
+                        misses += 1
+                        continue
                 except Exception as e:
                     print(e)
-                    misses += 1
                     continue
 
                 #~ but rename to the first line of the file
@@ -156,13 +158,22 @@ def main():
                     firstline = re.sub("\=", "", firstline)
                     firstline = re.sub("\.", "", firstline)
                     firstline = re.sub("\"", "", firstline)
+                    firstline = re.sub("\t", "_", firstline)
                     firstline = re.sub("<", "", firstline)
                     firstline = re.sub(">", "", firstline)
+                    firstline = re.sub("^", "", firstline)
+                    firstline = re.sub("&", "", firstline)
+                    firstline = re.sub("@", "", firstline)
                     firstline = re.sub(",", "", firstline)
+                    firstline = re.sub("?", "", firstline)
+                    firstline = re.sub("+", "", firstline)
                     firstline = re.sub(":", "", firstline)
+                    firstline = re.sub("*", "", firstline)
                     firstline = re.sub(";", "", firstline)
                     firstline = re.sub("`", "", firstline)
                     firstline = re.sub("'", "", firstline)
+                    firstline = re.sub("!", "", firstline)
+                    firstline = re.sub("|", "", firstline)
                     firstline = re.sub("%", "", firstline)
                     firstline = re.sub("~", "", firstline)
                     firstline = re.sub("#", "", firstline)
