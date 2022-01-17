@@ -132,3 +132,5 @@ dmypy.json
 .pyre/
 snax4moss.code-workspace
 
+scrape_stats
+oldoutput

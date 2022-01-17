@@ -107,30 +107,52 @@ def main():
             url = re.sub(" ", "%20", url)
             dl_URLs = dl_URLs + get_dl_links_from_urls(url)
 
+        with open("dl_URLs", "w") as DL_file:
+            print(*dl_URLs, sep = "\n", file = DL_file)
+
         #~ finally, download the actual files
         working_directory = os.getcwd()
         hits = 0
         misses = 0
-        for dl in dl_URLs:
-            #~ get the file
-            outfile = working_directory + "/output/temp"
-            try:
-                wget.download(dl, outfile)
-                hits += 1
-            except Exception as e:
-                print(dl, e)
-                misses += 1
-                continue
 
-            #~ but rename to the first line of the file
-            with open(outfile, "r") as f:
-                firstline = f.readline().strip()
-                firstline = re.sub(" ", "_", firstline)
-                firstline = re.sub("/", "-", firstline)
-                filetype = re.sub("https://mossbauer.mtholyoke.edu", "", dl)
-                filetype = re.sub("/", "_", filetype)
-                new_name = working_directory + "/output/" + firstline + filetype
-            os.rename(outfile, new_name)
+        with alive_bar(len(dl_URLs)) as bar:
+            for dl in dl_URLs:
+                #~ get the file
+                outfile = working_directory + "/output/temp"
+                try:
+                    wget.download(dl, outfile)
+                    hits += 1
+                except Exception as e:
+                    misses += 1
+                    continue
+
+                #~ but rename to the first line of the file
+                with open(outfile, "r") as f:
+                    firstline = f.readline().strip()
+                    firstline = re.sub(" ", "_", firstline)
+                    firstline = re.sub("/", "-", firstline)
+                    firstline = re.sub("(", "", firstline)
+                    firstline = re.sub(")", "", firstline)
+                    firstline = re.sub("[", "", firstline)
+                    firstline = re.sub("]", "", firstline)
+                    firstline = re.sub("{", "", firstline)
+                    firstline = re.sub("}", "", firstline)
+                    firstline = re.sub(",", "", firstline)
+                    firstline = re.sub(":", "", firstline)
+                    firstline = re.sub(";", "", firstline)
+                    firstline = re.sub("`", "", firstline)
+                    firstline = re.sub("'", "", firstline)
+                    firstline = re.sub("%", "", firstline)
+                    firstline = re.sub("~", "", firstline)
+                    firstline = re.sub("#", "", firstline)
+                    firstline = re.sub("+", "", firstline)
+                    firstline = re.sub("=", "", firstline)
+                    firstline = re.sub(".", "", firstline)
+                    firstline = re.sub("\"", "", firstline)
+                    filetype = re.sub("https://mossbauer.mtholyoke.edu", "", dl)
+                    new_name = working_directory + "/output/" + firstline + filetype
+                os.rename(outfile, new_name)
+            bar()
 
         end_time = datetime.datetime.now().replace(microsecond=0).isoformat()
         end_counter = time.perf_counter()
