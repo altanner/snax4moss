@@ -9,8 +9,12 @@ test_targets = [
     # 'https://mossbauer.mtholyoke.edu/sample/Wilshire San Carlos Hornblende 6mil 8-15-91',
     # 'https://mossbauer.mtholyoke.edu/sample/Wilshire Tm Hornblende 9mil 9-5-91',]
 
-#~ mt holyoke categories
+
 categories = [
+    "group/Allophane",]
+
+#~ mt holyoke categories
+dcategories = [
     "group/Allophane",
     "group/Alunite",
     "group/Amphibole",

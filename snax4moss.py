@@ -5,7 +5,6 @@ import os
 import time
 import datetime
 import re
-import wget
 from random import randint
 
 #~ 3rd party imports
@@ -45,8 +44,6 @@ def get_samples_from_category(category, baseurl) -> list:
     sample_list = soup.find_all(
         "a", {"class": "sl"}, text=True)
 
-    print(f"{len(sample_list)} sample links retrieved from category {category_name}")
-
     #~ add to a list of the href URLs
     for sample in sample_list:
         link = sample.text
@@ -63,7 +60,7 @@ def get_dl_links_from_urls(url) -> list:
     often doesn't exist."""
 
     dl_links = []
-
+    print(url)
     #~ pull down the category page
     try:
         target = requests.get(
@@ -98,31 +95,49 @@ def main():
         dl_URLs = []
 
         #~ build a list of all the sample URLs, for each category
-        for category in targets.categories:
-            sample_URLs = sample_URLs + get_samples_from_category(category, targets.baseurl)
+        with alive_bar(
+            len(targets.categories),
+            title="Scraping categories for samples...") as bar:
+            for category in targets.categories:
+                sample_URLs = sample_URLs + get_samples_from_category(category, targets.baseurl)
+                bar()
+        print(f".oO {len(sample_URLs)} URLs to scrape...")
 
         #~ then get the downloads for each sample
         # for url in targets.test_targets:
-        for url in sample_URLs:
-            url = re.sub(" ", "%20", url)
-            dl_URLs = dl_URLs + get_dl_links_from_urls(url)
+        with alive_bar(len(sample_URLs), title="Getting and cleaning URLs...", title_length=34) as bar:
+            for url in sample_URLs:
+                #~ spaces and hashes in URLs need reformatting
+                url = re.sub(" ", "%20", url)
+                url = re.sub("#", "%23", url)
+                dl_URLs = dl_URLs + get_dl_links_from_urls(url)
+                bar()
 
-        with open("dl_URLs", "w") as DL_file:
-            print(*dl_URLs, sep = "\n", file = DL_file)
+        with alive_bar(len(dl_URLs), title="Writing URLs to file...", title_length=34) as bar:
+            with open("dl_URLs", "w") as DL_file:
+                for thing in dl_URLs:
+                    DL_file.writelines(thing + "\n")
+                    bar()
 
         #~ finally, download the actual files
         working_directory = os.getcwd()
         hits = 0
         misses = 0
 
-        with alive_bar(len(dl_URLs)) as bar:
+        with alive_bar(len(dl_URLs),
+                    title="Requesting files...",
+                    title_length=34) as bar:
+
+            outfile = working_directory + "/output/temp"
             for dl in dl_URLs:
                 #~ get the file
-                outfile = working_directory + "/output/temp"
                 try:
-                    wget.download(dl, outfile)
+                    incoming = requests.get(dl)
+                    with open(outfile, "w") as savefile:
+                        savefile.write(incoming.text)
                     hits += 1
                 except Exception as e:
+                    print(e)
                     misses += 1
                     continue
 
@@ -131,12 +146,18 @@ def main():
                     firstline = f.readline().strip()
                     firstline = re.sub(" ", "_", firstline)
                     firstline = re.sub("/", "-", firstline)
-                    firstline = re.sub("(", "", firstline)
-                    firstline = re.sub(")", "", firstline)
-                    firstline = re.sub("[", "", firstline)
-                    firstline = re.sub("]", "", firstline)
-                    firstline = re.sub("{", "", firstline)
-                    firstline = re.sub("}", "", firstline)
+                    firstline = re.sub("\(", "", firstline)
+                    firstline = re.sub("\)", "", firstline)
+                    firstline = re.sub("\[", "", firstline)
+                    firstline = re.sub("\]", "", firstline)
+                    firstline = re.sub("\{", "", firstline)
+                    firstline = re.sub("\}", "", firstline)
+                    firstline = re.sub("\+", "", firstline)
+                    firstline = re.sub("\=", "", firstline)
+                    firstline = re.sub("\.", "", firstline)
+                    firstline = re.sub("\"", "", firstline)
+                    firstline = re.sub("<", "", firstline)
+                    firstline = re.sub(">", "", firstline)
                     firstline = re.sub(",", "", firstline)
                     firstline = re.sub(":", "", firstline)
                     firstline = re.sub(";", "", firstline)
@@ -145,14 +166,11 @@ def main():
                     firstline = re.sub("%", "", firstline)
                     firstline = re.sub("~", "", firstline)
                     firstline = re.sub("#", "", firstline)
-                    firstline = re.sub("+", "", firstline)
-                    firstline = re.sub("=", "", firstline)
-                    firstline = re.sub(".", "", firstline)
-                    firstline = re.sub("\"", "", firstline)
-                    filetype = re.sub("https://mossbauer.mtholyoke.edu", "", dl)
+                    filetype = re.sub("/", "_", dl)
+                    filetype = re.sub("https:__mossbauer.mtholyoke.edu", "", filetype)
                     new_name = working_directory + "/output/" + firstline + filetype
                 os.rename(outfile, new_name)
-            bar()
+                bar()
 
         end_time = datetime.datetime.now().replace(microsecond=0).isoformat()
         end_counter = time.perf_counter()
