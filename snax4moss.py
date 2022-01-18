@@ -128,7 +128,6 @@ def main():
             print(f".oO {len(sample_URLs)} URLs to scrape...")
 
             #~ then get the downloads for each sample
-            # for url in targets.test_targets:
             with alive_bar(len(sample_URLs), title="Getting and cleaning URLs...", title_length=34) as bar:
                 for url in sample_URLs:
                     #~ spaces and hashes in URLs need reformatting
