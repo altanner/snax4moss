@@ -5,6 +5,7 @@ import os
 import time
 import datetime
 import re
+import argparse
 from random import randint
 
 #~ 3rd party imports
@@ -20,6 +21,23 @@ import cchardet  # character recognition
 #~ Local imports
 import targets       # this will be the template in published version
 import scraper_meta  # things like user agents, in case we need to rotate
+
+
+def args_setup():
+
+    parser = argparse.ArgumentParser(
+        description = "Mt Holyoke Mossbauer Spectra Scraper",
+        epilog = "Example: python snax4moss.py --fetch")
+    parser.add_argument(
+        "--fetch", action = "store_true",
+        help = "Get the URLs from target site..")
+    parser.add_argument(
+        "--local", action = "store_true",
+        help = "Use the locally stored list of URLs in dl_URLs")
+
+    args = parser.parse_args()
+
+    return parser, args
 
 
 def get_samples_from_category(category, baseurl) -> list:
@@ -83,6 +101,12 @@ def get_dl_links_from_urls(url) -> list:
 
 def main():
 
+    parser, args = args_setup()
+
+    if not any([args.fetch, args.local]):
+        print("Should I fetch or use a local file [dl_URLs]?")
+        sys.exit(0)
+
     try:
         start_time = datetime.datetime.now().replace(microsecond=0).isoformat()
         start_counter = time.perf_counter()
@@ -90,33 +114,39 @@ def main():
         print(
             f"\n.oO Starting snax4moss @ {start_time} - target base URL is {targets.baseurl}")
 
-        sample_URLs = []
-        dl_URLs = []
+        if args.fetch:
+            sample_URLs = []
+            dl_URLs = []
 
-        #~ build a list of all the sample URLs, for each category
-        with alive_bar(
-            len(targets.categories),
-            title="Scraping categories for samples...") as bar:
-            for category in targets.categories:
-                sample_URLs = sample_URLs + get_samples_from_category(category, targets.baseurl)
-                bar()
-        print(f".oO {len(sample_URLs)} URLs to scrape...")
-
-        #~ then get the downloads for each sample
-        # for url in targets.test_targets:
-        with alive_bar(len(sample_URLs), title="Getting and cleaning URLs...", title_length=34) as bar:
-            for url in sample_URLs:
-                #~ spaces and hashes in URLs need reformatting
-                url = re.sub(" ", "%20", url)
-                url = re.sub("#", "%23", url)
-                dl_URLs = dl_URLs + get_dl_links_from_urls(url)
-                bar()
-
-        with alive_bar(len(dl_URLs), title="Writing URLs to file...", title_length=34) as bar:
-            with open("dl_URLs", "w") as DL_file:
-                for thing in dl_URLs:
-                    DL_file.writelines(thing + "\n")
+            #~ build a list of all the sample URLs, for each category
+            with alive_bar(
+                len(targets.categories),
+                title="Scraping categories for samples...") as bar:
+                for category in targets.categories:
+                    sample_URLs = sample_URLs + get_samples_from_category(category, targets.baseurl)
                     bar()
+            print(f".oO {len(sample_URLs)} URLs to scrape...")
+
+            #~ then get the downloads for each sample
+            # for url in targets.test_targets:
+            with alive_bar(len(sample_URLs), title="Getting and cleaning URLs...", title_length=34) as bar:
+                for url in sample_URLs:
+                    #~ spaces and hashes in URLs need reformatting
+                    url = re.sub(" ", "%20", url)
+                    url = re.sub("#", "%23", url)
+                    dl_URLs = dl_URLs + get_dl_links_from_urls(url)
+                    bar()
+
+            with alive_bar(len(dl_URLs), title="Writing URLs to file...", title_length=34) as bar:
+                with open("dl_URLs", "w") as DL_file:
+                    for thing in dl_URLs:
+                        DL_file.writelines(thing + "\n")
+                        bar()
+
+        if args.local:
+            with open("dl_URLs", "r") as urls:
+                dl_URLs = urls.readlines()
+                dl_URLs = [x.strip() for x in dl_URLs]
 
         #~ finally, download the actual files
         working_directory = os.getcwd()
@@ -159,16 +189,15 @@ def main():
                     firstline = re.sub("\.", "", firstline)
                     firstline = re.sub("\"", "", firstline)
                     firstline = re.sub("\t", "_", firstline)
+                    firstline = re.sub("\?", "", firstline)
+                    firstline = re.sub("\*", "", firstline)
                     firstline = re.sub("<", "", firstline)
                     firstline = re.sub(">", "", firstline)
                     firstline = re.sub("^", "", firstline)
                     firstline = re.sub("&", "", firstline)
                     firstline = re.sub("@", "", firstline)
                     firstline = re.sub(",", "", firstline)
-                    firstline = re.sub("?", "", firstline)
-                    firstline = re.sub("+", "", firstline)
                     firstline = re.sub(":", "", firstline)
-                    firstline = re.sub("*", "", firstline)
                     firstline = re.sub(";", "", firstline)
                     firstline = re.sub("`", "", firstline)
                     firstline = re.sub("'", "", firstline)
