@@ -123,12 +123,15 @@ def main():
                 len(targets.categories),
                 title="Scraping categories for samples...") as bar:
                 for category in targets.categories:
-                    sample_URLs = sample_URLs + get_samples_from_category(category, targets.baseurl)
+                    sample_URLs = sample_URLs + get_samples_from_category(
+                        category, targets.baseurl)
                     bar()
             print(f".oO {len(sample_URLs)} URLs to scrape...")
 
             #~ then get the downloads for each sample
-            with alive_bar(len(sample_URLs), title="Getting and cleaning URLs...", title_length=34) as bar:
+            with alive_bar(len(sample_URLs),
+                title="Getting and cleaning URLs...",
+                title_length=34) as bar:
                 for url in sample_URLs:
                     #~ spaces and hashes in URLs need reformatting
                     url = re.sub(" ", "%20", url)
@@ -136,7 +139,9 @@ def main():
                     dl_URLs = dl_URLs + get_dl_links_from_urls(url)
                     bar()
 
-            with alive_bar(len(dl_URLs), title="Writing URLs to file...", title_length=34) as bar:
+            with alive_bar(len(dl_URLs),
+                title="Writing URLs to file...",
+                title_length=34) as bar:
                 with open("dl_URLs", "w") as DL_file:
                     for thing in dl_URLs:
                         DL_file.writelines(thing + "\n")
@@ -153,8 +158,8 @@ def main():
         misses = 0
 
         with alive_bar(len(dl_URLs),
-                    title="Requesting files...",
-                    title_length=34) as bar:
+            title="Requesting files...",
+            title_length=34) as bar:
 
             outfile = working_directory + "/output/temp"
             for dl in dl_URLs:
@@ -168,16 +173,18 @@ def main():
                     else:
                         misses += 1
                         continue
+                        bar()
                 except Exception as e:
                     print(e)
                     continue
+                    bar()
 
                 #~ but rename to the first line of the file
                 with open(outfile, "r") as f:
                     firstline = f.readline().strip()
                     firstline = re.sub(" ", "_", firstline)
                     firstline = re.sub(r"[^a-zA-Z0-9_]", "", firstline)
-                    filetype = re.sub("/", "_", dl) # is it a datafile or textfile
+                    filetype = re.sub("/", "_", dl) # append datafile or textfile?
                     filetype = re.sub("https:__mossbauer.mtholyoke.edu", "", filetype)
                     new_name = working_directory + "/output/" + firstline + filetype
                 os.rename(outfile, new_name)
@@ -191,7 +198,7 @@ def main():
         print(f".oO {hits} successes, {misses} fails.")
 
     except KeyboardInterrupt:
-        print("\n.oO OK, dropping. That run was not saved.")
+        print("\n.oO OK, dropping.")
         sys.exit(0)
 
 
