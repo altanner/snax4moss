@@ -107,6 +107,10 @@ def main():
         print("Should I fetch or use a local file [dl_URLs]?")
         sys.exit(0)
 
+    if not os.path.exists(os.getcwd() + "/output/"):
+        print("Making output folder...")
+        os.mkdir(os.getcwd() + "/output/")
+
     try:
         start_time = datetime.datetime.now().replace(microsecond=0).isoformat()
         start_counter = time.perf_counter()
@@ -153,7 +157,6 @@ def main():
                 dl_URLs = [x.strip() for x in dl_URLs]
 
         #~ finally, download the actual files
-        working_directory = os.getcwd()
         hits = 0
         misses = 0
 
@@ -161,7 +164,7 @@ def main():
             title="Requesting files...",
             title_length=34) as bar:
 
-            outfile = working_directory + "/output/temp"
+            outfile = os.getcwd() + "/output/temp"
             for dl in dl_URLs:
                 #~ get the file
                 try:
@@ -186,7 +189,7 @@ def main():
                     firstline = re.sub(r"[^a-zA-Z0-9_]", "", firstline)
                     filetype = re.sub("/", "_", dl) # append datafile or textfile?
                     filetype = re.sub("https:__mossbauer.mtholyoke.edu", "", filetype)
-                    new_name = working_directory + "/output/" + firstline + filetype
+                    new_name = os.getcwd() + "/output/" + firstline + filetype
                 os.rename(outfile, new_name)
                 bar()
 

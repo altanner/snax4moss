@@ -1,5 +1,9 @@
 # custom
-output/*
+snax4moss.code-workspace
+scrape_stats
+dl_URLs
+full_dl_URLs
+*output*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -130,8 +134,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-snax4moss.code-workspace
-
-scrape_stats
-dl_URLs
-full_dl_URLs
