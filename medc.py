@@ -52,5 +52,5 @@ with alive_bar(final_page, title="Scraping MEDC...") as bar:
         page += 1
         bar()
 
-
-print(df)
+df.to_csv("./medc_output/medc.csv")
+print("OK, done, saved to ./medc_outpt/medc.csv")
