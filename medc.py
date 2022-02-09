@@ -4,6 +4,7 @@ from requests.auth import HTTPBasicAuth
 from requests.structures import CaseInsensitiveDict
 from bs4 import BeautifulSoup
 import pandas as pd
+import os
 import re
 import pickle
 from alive_progress import alive_bar
@@ -15,6 +16,10 @@ page = 1
 # final_page = 928
 # final_page = 3300
 final_page = 3
+
+if not os.path.exists(os.getcwd() + "/medc_output/"):
+    print("Making output folder...")
+    os.mkdir(os.getcwd() + "/medc_output/")
 
 #~ init the output dataframe
 df = pd.DataFrame(columns=[
