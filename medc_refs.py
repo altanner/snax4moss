@@ -33,27 +33,31 @@ with open("refcodes2", "r") as infile:
 #~ init the output dataframe
 df = pd.DataFrame(columns=["Refcode", "Reference"])
 
-with alive_bar(len(refcode_list), title="Scraping MEDC refcodes...") as bar:
-    for refcode in refcode_list:
+try:
+    with alive_bar(len(refcode_list), title="Scraping MEDC refcodes...") as bar:
+        for refcode in refcode_list:
 
-        url = f"http://159.226.238.174:44333/refsearch.php?&sql=%20refcode=%20%27{refcode}%27%20"
+            url = f"http://159.226.238.174:44333/refsearch.php?&sql=%20refcode=%20%27{refcode}%27%20"
 
-        #~ get the page
-        response = requests.get(url,
-            headers=creds.user_agent,
-            cookies=creds.cookies,
-            auth=HTTPBasicAuth(creds.uname, creds.passw))
+            #~ get the page
+            response = requests.get(url,
+                headers=creds.user_agent,
+                cookies=creds.cookies,
+                auth=HTTPBasicAuth(creds.uname, creds.passw))
 
-        #~ soup the page up
-        soup = BeautifulSoup(response.text, "html.parser")
+            #~ soup the page up
+            soup = BeautifulSoup(response.text, "html.parser")
 
-        #~ get the reference
-        reference = soup.find("div", {"id": "data"}).text
-        reference = re.sub("\r.*?[ ]", "", str(reference)) #~ remove invisible \r
+            #~ get the reference
+            reference = soup.find("div", {"id": "data"}).text
+            reference = re.sub("\r.*?[ ]", "", str(reference)) #~ remove invisible \r
 
-        df.loc[len(df.index)] = [refcode, reference]
+            df.loc[len(df.index)] = [refcode, reference]
 
-        bar()
+            bar()
+except Exception as e:
+    df.to_csv("./medc_output/medc_refs.csv")
+    print(f"Something broke: {e}")
 
 df.to_csv("./medc_output/medc_refs.csv")
 
