@@ -1,3 +1,13 @@
+"""
+~ http://www.medc.dicp.ac.cn/
+~ http://159.226.238.174:44333/datasearch.php
+~ scraper. You'll need login details, and grab a session
+~ cookie to get this to work.
+~ Gets all table details for a particular isocode, paginating through
+~ all result pages.
+~ Saves output as a .csv in ./medc_output
+"""
+
 #~ Imports
 import requests
 from requests.auth import HTTPBasicAuth
@@ -58,4 +68,5 @@ with alive_bar(final_page, title="Scraping MEDC...") as bar:
         bar()
 
 df.to_csv("./medc_output/medc.csv")
+
 print("OK, done, saved to ./medc_outpt/medc.csv")
